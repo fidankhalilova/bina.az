@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Main Property Model
+model Property {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  
+  // Category & Type
+  category    PropertyCategory
+  type        PropertyType
+  
+  // Basic Info
+  price       Decimal   @db.Decimal(12, 2)
+  area        Decimal    @db.Decimal(10, 2)
+  rooms       Int?
+  floor       Int?
+  totalFloors Int?
+  
+  // Location
+  cityId      String
+  city        City     @relation(fields: [cityId], references: [id])
+  districtId  String
+  district    District @relation(fields: [districtId], references: [id])
+  address     String?
+  
+  // Images - using direct links (must have at least 3)
+  images      String[] // Array of image URLs
+  
+  // Contact
+  contactName  String
+  contactPhone String
+  contactEmail String?
+  
+  // Metadata
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([category])
+  @@index([type])
+  @@index([cityId])
+  @@index([districtId])
+  @@index([createdAt])
+}
+
+// Cities
+model City {
+  id         String     @id @default(uuid())
+  name       String     @unique
+  slug       String     @unique
+  districts  District[]
+  properties Property[]
+  createdAt  DateTime   @default(now())
+}
+
+// Districts
+model District {
+  id         String     @id @default(uuid())
+  name       String
+  slug       String
+  cityId     String
+  city       City       @relation(fields: [cityId], references: [id])
+  properties Property[]
+  createdAt  DateTime   @default(now())
+  
+  @@unique([cityId, slug])
+  @@index([cityId])
+}
+
+// Enums
+enum PropertyCategory {
+  SALE
+  RENT
+}
+
+enum PropertyType {
+  NEW_BUILDING
+  OLD_BUILDING
+  HOUSE
+  LAND
+  OFFICE
+  GARAGE
+  COMMERCIAL
+}
