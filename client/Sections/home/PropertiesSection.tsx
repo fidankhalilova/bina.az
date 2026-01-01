@@ -1,4 +1,4 @@
-// src/sections/home/AgentsSection/AgentsSection.tsx - SIMPLER VERSION
+// src/Sections/home/PropertiesSection.tsx - UPDATED VERSION
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,36 +8,104 @@ import HouseCard from "@/Components/HouseCard";
 import { ChevronRight } from "lucide-react";
 
 interface Props {
-  // Receive filters from parent component (Home page)
   activeFilters?: any;
-  totalResults?: number;
 }
 
-export default function AgentsSection({ activeFilters, totalResults }: Props) {
-  // Use the filters passed from parent or default
-  const filters = {
-    ...(activeFilters || {}),
+export default function PropertiesSection({
+  activeFilters: initialFilters,
+}: Props) {
+  const [activeFilters, setActiveFilters] = useState<any>({});
+  const [totalResults, setTotalResults] = useState(0);
+
+  // Initialize from props
+  useEffect(() => {
+    if (initialFilters) {
+      setActiveFilters(initialFilters);
+    }
+  }, [initialFilters]);
+
+  // Listen to filter changes
+  useEffect(() => {
+    const handleFilterChange = (event: CustomEvent) => {
+      setActiveFilters(event.detail);
+    };
+
+    window.addEventListener(
+      "filtersChanged",
+      handleFilterChange as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "filtersChanged",
+        handleFilterChange as EventListener
+      );
+    };
+  }, []);
+
+  // Prepare filters for API call - convert all values to strings
+  const apiFilters = {
+    ...activeFilters,
     limit: "4",
     page: "1",
   };
 
-  const { data, isLoading } = useProperties(filters);
+  // Convert all values to strings and remove empty values
+  const cleanFilters: Record<string, string> = {};
+  Object.entries(apiFilters).forEach(([key, value]) => {
+    if (value !== "" && value !== undefined && value !== null) {
+      cleanFilters[key] = String(value);
+    }
+  });
+
+  // For URL params (excluding limit and page for the "Hamısını gör" link)
+  const urlFilters: Record<string, string> = {};
+  Object.entries(activeFilters).forEach(([key, value]) => {
+    if (
+      value !== "" &&
+      value !== undefined &&
+      value !== null &&
+      key !== "limit" &&
+      key !== "page"
+    ) {
+      urlFilters[key] = String(value);
+    }
+  });
+
+  const { data, isLoading } = useProperties(cleanFilters);
 
   const properties = data?.data?.slice(0, 4) || [];
+
+  useEffect(() => {
+    if (data?.total !== undefined) {
+      setTotalResults(data.total);
+    } else if (data?.data?.length) {
+      setTotalResults(data.data.length);
+    } else {
+      setTotalResults(0);
+    }
+  }, [data]);
+
+  // Check if we have active filters (excluding default category)
+  const hasActiveFilters = Object.keys(activeFilters).some(
+    (key) => key !== "category" && activeFilters[key] !== ""
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">
-          {activeFilters ? "Filtrli Mənzillər" : "Son Mənzillər"}
+          {hasActiveFilters ? "Filtrli Mənzillər" : "Son Mənzillər"}
         </h2>
-        <Link
-          href={`/properties?${new URLSearchParams(filters).toString()}`}
-          className="text-blue-600 hover:underline text-sm font-medium flex items-center gap-1"
-        >
-          Hamısını gör
-          <ChevronRight className="w-4 h-4" />
-        </Link>
+        {properties.length > 0 && (
+          <Link
+            href={`/properties?${new URLSearchParams(urlFilters).toString()}`}
+            className="text-blue-600 hover:underline text-sm font-medium flex items-center gap-1"
+          >
+            Hamısını gör
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        )}
       </div>
 
       {isLoading ? (
@@ -52,7 +120,9 @@ export default function AgentsSection({ activeFilters, totalResults }: Props) {
         </div>
       ) : properties.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          Filtrlərə uyğun mənzil tapılmadı
+          {hasActiveFilters
+            ? "Filtrlərə uyğun mənzil tapılmadı"
+            : "Mövcud mənzil yoxdur"}
         </div>
       ) : (
         <>
@@ -62,10 +132,12 @@ export default function AgentsSection({ activeFilters, totalResults }: Props) {
             ))}
           </div>
 
-          {totalResults && totalResults > 4 && (
+          {totalResults > 4 && (
             <div className="mt-8 text-center">
               <Link
-                href={`/properties?${new URLSearchParams(filters).toString()}`}
+                href={`/properties?${new URLSearchParams(
+                  urlFilters
+                ).toString()}`}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
               >
                 Bütün {totalResults} mənzili gör

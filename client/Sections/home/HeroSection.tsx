@@ -1,4 +1,4 @@
-// src/sections/home/HeroSection/HeroSection.tsx
+// src/Sections/home/HeroSection.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,7 +8,7 @@ import { Search, SlidersHorizontal, MapPin, FilterX } from "lucide-react";
 export default function HeroSection() {
   const router = useRouter();
   const [filters, setFilters] = useState({
-    category: "SALE",
+    category: "", // Changed from "SALE" to empty for "All"
     type: "",
     rooms: "",
     cityId: "",
@@ -19,6 +19,42 @@ export default function HeroSection() {
   const [cities, setCities] = useState<any[]>([]);
   const [districts, setDistricts] = useState<any[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  // Initialize filters from URL on component mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlFilters = {
+        category: params.get("category") || "", // Changed to empty default
+        type: params.get("type") || "",
+        rooms: params.get("rooms") || "",
+        cityId: params.get("cityId") || "",
+        districtId: params.get("districtId") || "",
+        minPrice: params.get("minPrice") || "",
+        maxPrice: params.get("maxPrice") || "",
+      };
+      setFilters(urlFilters);
+    }
+  }, []);
+
+  // Listen for filter changes from other components
+  useEffect(() => {
+    const handleFilterChange = (event: CustomEvent) => {
+      setFilters(event.detail);
+    };
+
+    window.addEventListener(
+      "filtersChanged",
+      handleFilterChange as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "filtersChanged",
+        handleFilterChange as EventListener
+      );
+    };
+  }, []);
 
   // Fetch cities
   useEffect(() => {
@@ -53,14 +89,19 @@ export default function HeroSection() {
   }, [filters.cityId]);
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => {
-      const newFilters = { ...prev, [key]: value };
-      // Reset district when city changes
-      if (key === "cityId") {
-        newFilters.districtId = "";
-      }
-      return newFilters;
-    });
+    const newFilters = { ...filters, [key]: value };
+    // Reset district when city changes
+    if (key === "cityId") {
+      newFilters.districtId = "";
+    }
+    setFilters(newFilters);
+
+    // Dispatch event immediately for real-time updates
+    window.dispatchEvent(
+      new CustomEvent("filtersChanged", {
+        detail: newFilters,
+      })
+    );
   };
 
   const handleSearch = () => {
@@ -85,25 +126,27 @@ export default function HeroSection() {
   };
 
   const handlePriceRangeChange = (range: string) => {
+    let newFilters = { ...filters };
+
     if (range === "0-50000") {
-      setFilters((prev) => ({ ...prev, minPrice: "0", maxPrice: "50000" }));
+      newFilters = { ...newFilters, minPrice: "0", maxPrice: "50000" };
     } else if (range === "50000-100000") {
-      setFilters((prev) => ({
-        ...prev,
-        minPrice: "50000",
-        maxPrice: "100000",
-      }));
+      newFilters = { ...newFilters, minPrice: "50000", maxPrice: "100000" };
     } else if (range === "100000-200000") {
-      setFilters((prev) => ({
-        ...prev,
-        minPrice: "100000",
-        maxPrice: "200000",
-      }));
+      newFilters = { ...newFilters, minPrice: "100000", maxPrice: "200000" };
     } else if (range === "200000+") {
-      setFilters((prev) => ({ ...prev, minPrice: "200000", maxPrice: "" }));
+      newFilters = { ...newFilters, minPrice: "200000", maxPrice: "" };
     } else {
-      setFilters((prev) => ({ ...prev, minPrice: "", maxPrice: "" }));
+      newFilters = { ...newFilters, minPrice: "", maxPrice: "" };
     }
+
+    setFilters(newFilters);
+    // Dispatch event immediately
+    window.dispatchEvent(
+      new CustomEvent("filtersChanged", {
+        detail: newFilters,
+      })
+    );
   };
 
   const getPriceRangeValue = () => {
@@ -119,30 +162,29 @@ export default function HeroSection() {
   };
 
   const clearFilters = () => {
-    setFilters({
-      category: "SALE",
+    const defaultFilters = {
+      category: "", // Changed to empty for "All"
       type: "",
       rooms: "",
       cityId: "",
       districtId: "",
       minPrice: "",
       maxPrice: "",
-    });
+    };
+
+    setFilters(defaultFilters);
     router.push("/", { scroll: false });
     window.dispatchEvent(
       new CustomEvent("filtersChanged", {
-        detail: {
-          category: "SALE",
-          type: "",
-          rooms: "",
-          cityId: "",
-          districtId: "",
-          minPrice: "",
-          maxPrice: "",
-        },
+        detail: defaultFilters,
       })
     );
   };
+
+  // Check if we have active filters (now including category since it can be empty)
+  const hasActiveFilters = Object.keys(filters).some(
+    (key) => filters[key as keyof typeof filters] !== ""
+  );
 
   return (
     <div className="bg-white border-b text-gray-900">
@@ -151,12 +193,13 @@ export default function HeroSection() {
         <div className="space-y-4">
           {/* Top Row - Basic Filters */}
           <div className="flex flex-wrap gap-3">
-            {/* Category */}
+            {/* Category - Updated with "Hamısı" option */}
             <select
               value={filters.category}
               onChange={(e) => handleFilterChange("category", e.target.value)}
               className="px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 min-w-30"
             >
+              <option value="">Hamısı</option>
               <option value="SALE">Alış</option>
               <option value="RENT">Kirayə</option>
             </select>
@@ -247,12 +290,7 @@ export default function HeroSection() {
             </div>
 
             {/* Clear Filters Button */}
-            {(filters.type ||
-              filters.rooms ||
-              filters.cityId ||
-              filters.districtId ||
-              filters.minPrice ||
-              filters.maxPrice) && (
+            {hasActiveFilters && (
               <button
                 onClick={clearFilters}
                 className="px-4 py-2.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
@@ -281,15 +319,17 @@ export default function HeroSection() {
             </button>
           </div>
 
-          {/* Active Filters Display */}
-          {(filters.type ||
-            filters.rooms ||
-            filters.cityId ||
-            filters.districtId) && (
+          {/* Active Filters Display - Updated to show category */}
+          {hasActiveFilters && (
             <div className="flex flex-wrap gap-2 p-3 bg-blue-50 rounded-lg">
               <span className="text-sm text-blue-800 font-medium">
                 Aktiv filtrlər:
               </span>
+              {filters.category && (
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                  {filters.category === "SALE" ? "Alış" : "Kirayə"}
+                </span>
+              )}
               {filters.type && (
                 <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
                   {filters.type === "NEW_BUILDING"
@@ -304,7 +344,7 @@ export default function HeroSection() {
                     ? "Ofis"
                     : filters.type === "GARAGE"
                     ? "Qaraj"
-                    : "Obyekt"}
+                    : "Kommersiya"}
                 </span>
               )}
               {filters.rooms && (
