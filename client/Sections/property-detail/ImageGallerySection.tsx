@@ -2,9 +2,17 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Image from "next/image";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import Lightbox from "yet-another-react-lightbox";
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+import Slideshow from "yet-another-react-lightbox/plugins/slideshow";
+import Download from "yet-another-react-lightbox/plugins/download";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/thumbnails.css";
+import "yet-another-react-lightbox/plugins/captions.css";
 
 interface ImageGallerySectionProps {
   images: string[]; // Array of image URLs
@@ -21,7 +29,7 @@ export default function ImageGallerySection({
   images,
 }: ImageGallerySectionProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [imageError, setImageError] = useState<{ [key: string]: boolean }>({});
 
   // Ensure minimum 3 images
@@ -38,17 +46,31 @@ export default function ImageGallerySection({
     "displayed"
   );
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     setSelectedIndex((prev) =>
       prev === 0 ? displayImages.length - 1 : prev - 1
     );
-  };
+  }, [displayImages.length]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setSelectedIndex((prev) =>
       prev === displayImages.length - 1 ? 0 : prev + 1
     );
+  }, [displayImages.length]);
+
+  const openLightbox = (index: number) => {
+    setSelectedIndex(index);
+    setIsLightboxOpen(true);
   };
+
+  const closeLightbox = () => {
+    setIsLightboxOpen(false);
+  };
+
+  const slides = displayImages.map((src, index) => ({
+    src,
+    alt: `Property image ${index + 1}`,
+  }));
 
   const visibleThumbnails = displayImages.slice(0, 7);
   const remainingCount = Math.max(0, displayImages.length - 7);
@@ -62,13 +84,13 @@ export default function ImageGallerySection({
           {currentImage && !imageError[currentImage] ? (
             <div
               className="relative w-full h-full cursor-pointer"
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => openLightbox(selectedIndex)}
             >
               <Image
                 src={currentImage}
                 alt={`Property image ${selectedIndex + 1}`}
                 fill
-                className="object-contain"
+                className="object-cover hover:scale-105 transition-transform duration-300"
                 priority={selectedIndex === 0}
                 unoptimized
                 onError={() => {
@@ -76,11 +98,22 @@ export default function ImageGallerySection({
                   setImageError((prev) => ({ ...prev, [currentImage]: true }));
                 }}
               />
+              {/* Gallery Icon Overlay */}
+              <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center">
+                <div className="bg-white/90 backdrop-blur-sm rounded-full p-4 opacity-0 hover:opacity-100 transition-opacity shadow-lg">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🔍</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      Şəkillərə bax
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div
               className="w-full h-full flex items-center justify-center cursor-pointer"
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => openLightbox(selectedIndex)}
             >
               <div className="text-center">
                 <div className="text-6xl mb-2">🏠</div>
@@ -101,14 +134,17 @@ export default function ImageGallerySection({
                     ? "border-green-500 ring-2 ring-green-200"
                     : "border-gray-200 hover:border-gray-400"
                 }`}
-                onClick={() => setSelectedIndex(index)}
+                onClick={() => {
+                  setSelectedIndex(index);
+                  openLightbox(index);
+                }}
               >
                 {!imageError[image] ? (
                   <Image
                     src={image}
                     alt={`Thumbnail ${index + 1}`}
                     fill
-                    className="object-cover"
+                    className="object-cover hover:scale-110 transition-transform duration-200"
                     unoptimized
                     onError={() => {
                       setImageError((prev) => ({ ...prev, [image]: true }));
@@ -124,10 +160,14 @@ export default function ImageGallerySection({
 
             {remainingCount > 0 && (
               <div
-                className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden cursor-pointer bg-gray-800 hover:bg-gray-700 transition-colors flex items-center justify-center text-white font-semibold text-xs"
-                onClick={() => setIsModalOpen(true)}
+                className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden cursor-pointer bg-linear-to-br from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800 transition-all flex items-center justify-center text-white font-semibold text-xs group"
+                onClick={() => openLightbox(6)}
               >
-                +{remainingCount} şəkil
+                <div className="text-center group-hover:scale-110 transition-transform">
+                  <div className="text-lg mb-1">+</div>
+                  <div>{remainingCount}</div>
+                  <div className="text-[10px] opacity-80">şəkil</div>
+                </div>
               </div>
             )}
           </div>
@@ -145,55 +185,82 @@ export default function ImageGallerySection({
         </div>
       </div>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/65 z-50 flex items-center justify-center h-full">
-          <button
-            onClick={() => setIsModalOpen(false)}
-            className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full transition-colors z-10"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          <button
-            onClick={handlePrevious}
-            className="absolute left-4 p-3 text-white hover:bg-white/10 rounded-full transition-colors z-10"
-          >
-            <ChevronLeft className="w-8 h-8" />
-          </button>
-
-          <button
-            onClick={handleNext}
-            className="absolute right-4 p-3 text-white hover:bg-white/10 rounded-full transition-colors z-10"
-          >
-            <ChevronRight className="w-8 h-8" />
-          </button>
-
-          <div className="relative w-full h-full max-w-6xl max-h-[90vh] flex items-center justify-center p-4">
-            {currentImage && !imageError[currentImage] ? (
-              <Image
-                src={currentImage}
-                alt={`Property image ${selectedIndex + 1}`}
-                fill
-                className="object-contain"
-                unoptimized
-                onError={() => {
-                  setImageError((prev) => ({ ...prev, [currentImage]: true }));
-                }}
-              />
-            ) : (
-              <div className="text-white text-center">
-                <div className="text-6xl mb-4">🖼️</div>
-                <p>Şəkil yüklənmədi</p>
-              </div>
-            )}
-          </div>
-
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-2 rounded-full">
-            {selectedIndex + 1} / {displayImages.length}
-          </div>
-        </div>
-      )}
+      {/* Lightbox */}
+      <Lightbox
+        open={isLightboxOpen}
+        close={closeLightbox}
+        slides={slides}
+        index={selectedIndex}
+        plugins={[Thumbnails, Zoom, Fullscreen, Slideshow, Download]}
+        thumbnails={{
+          position: "bottom",
+          width: 80,
+          height: 60,
+          border: 1,
+          borderRadius: 4,
+          padding: 4,
+          gap: 16,
+          imageFit: "cover",
+        }}
+        zoom={{
+          maxZoomPixelRatio: 3,
+          zoomInMultiplier: 2,
+          doubleTapDelay: 300,
+          doubleClickDelay: 300,
+          scrollToZoom: true,
+        }}
+        carousel={{
+          finite: false,
+          preload: 2,
+          padding: 16,
+          spacing: "16px",
+          imageFit: "contain",
+        }}
+        controller={{
+          closeOnPullDown: true,
+          closeOnBackdropClick: true,
+        }}
+        styles={{
+          container: { backgroundColor: "rgba(0, 0, 0, 0.92)" },
+          thumbnail: { borderColor: "#10b981" },
+        }}
+        on={{
+          view: ({ index }) => setSelectedIndex(index),
+        }}
+        render={{
+          buttonPrev: () => (
+            <button
+              className="yarl__button yarl__navigation_button yarl__navigation_button_prev"
+              aria-label="Əvvəlki şəkil"
+            >
+              ←
+            </button>
+          ),
+          buttonNext: () => (
+            <button
+              className="yarl__button yarl__navigation_button yarl__navigation_button_next"
+              aria-label="Növbəti şəkil"
+            >
+              →
+            </button>
+          ),
+          iconClose: () => (
+            <span className="text-xl" aria-label="Bağla">
+              ✕
+            </span>
+          ),
+          iconZoomIn: () => (
+            <span className="text-lg" aria-label="Yaxınlaşdır">
+              🔍+
+            </span>
+          ),
+          iconZoomOut: () => (
+            <span className="text-lg" aria-label="Uzaqlaşdır">
+              🔍-
+            </span>
+          ),
+        }}
+      />
     </>
   );
 }
