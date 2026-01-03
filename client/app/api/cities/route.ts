@@ -1,4 +1,3 @@
-// app/api/cities/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -11,7 +10,6 @@ export async function GET(request: NextRequest) {
     const page = parseInt(url.searchParams.get("page") || "1");
     const skip = (page - 1) * limit;
 
-    // Get cities with their district counts
     const [cities, total] = await Promise.all([
       prisma.city.findMany({
         include: {
@@ -59,14 +57,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Optional: POST endpoint to create a new city
 export async function POST(request: NextRequest) {
   try {
     console.log("📡 API: Creating new city...");
 
     const body = await request.json();
 
-    // Validate required fields
     if (!body.name || !body.slug) {
       return NextResponse.json(
         {
@@ -77,7 +73,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if city with same slug already exists
     const existingCity = await prisma.city.findUnique({
       where: { slug: body.slug },
     });
@@ -92,7 +87,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create city
     const city = await prisma.city.create({
       data: {
         name: body.name,

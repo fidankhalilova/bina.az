@@ -1,4 +1,3 @@
-// src/sections/property-detail/SimilarPropertiesSection.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -21,7 +20,6 @@ export default function SimilarPropertiesSection({
 }: SimilarPropertiesSectionProps) {
   const [activeTab, setActiveTab] = useState("all");
 
-  // Fetch similar properties based on filters
   const { data, isLoading } = useQuery({
     queryKey: ["similar-properties", districtId, cityId, type],
     queryFn: () => {

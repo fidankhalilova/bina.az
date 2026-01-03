@@ -1,5 +1,3 @@
-// src/hooks/useProperties.ts
-
 import { useQuery } from "@tanstack/react-query";
 import { Property, PropertyFilters, PaginatedResponse } from "@/types/global";
 
@@ -29,8 +27,6 @@ export function useProperties(filters: PropertyFilters = {}) {
     queryFn: () => fetchProperties(filters),
   });
 }
-
-// src/hooks/useProperty.ts
 
 export async function fetchProperty(id: string): Promise<Property> {
   const response = await fetch(`/api/properties/${id}`);

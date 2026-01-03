@@ -1,5 +1,3 @@
-// src/sections/property-create/StepOne.tsx
-
 "use client";
 
 import React, { useState } from "react";
@@ -18,7 +16,6 @@ export default function StepOne({ onComplete, initialData }: StepOneProps) {
 
   const handleSelect = (type: "SALE" | "RENT") => {
     setSelected(type);
-    // Auto-advance after selection
     setTimeout(() => {
       onComplete({ listingType: type });
     }, 300);

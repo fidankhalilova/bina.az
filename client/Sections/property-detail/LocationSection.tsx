@@ -1,4 +1,3 @@
-// src/sections/property-detail/LocationSection.tsx
 "use client";
 
 import React from "react";

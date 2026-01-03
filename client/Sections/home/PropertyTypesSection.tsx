@@ -1,4 +1,3 @@
-// src/Sections/home/PropertyTypesSection.tsx
 "use client";
 
 import React from "react";
@@ -18,19 +17,16 @@ export default function PropertyTypesSection() {
   ];
 
   const handlePropertyTypeClick = (typeId: string) => {
-    // Create filters object
     const filters = {
       category: "SALE",
       type: typeId,
     };
 
-    // Update URL
     const params = new URLSearchParams();
     params.append("category", "SALE");
     params.append("type", typeId);
     router.push(`/?${params.toString()}`, { scroll: false });
 
-    // Dispatch filter change
     window.dispatchEvent(
       new CustomEvent("filtersChanged", {
         detail: filters,

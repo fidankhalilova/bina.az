@@ -1,5 +1,3 @@
-// src/sections/property-create/StepTwo.tsx
-
 "use client";
 
 import React, { useState } from "react";

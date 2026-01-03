@@ -1,5 +1,3 @@
-// src/sections/property-detail/ImageGallerySection/ImageGallerySection.tsx
-
 "use client";
 
 import React, { useState, useCallback } from "react";
@@ -15,10 +13,9 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 
 interface ImageGallerySectionProps {
-  images: string[]; // Array of image URLs
+  images: string[];
 }
 
-// Default images if property has fewer than 3
 const DEFAULT_IMAGES = [
   "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800",
   "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
@@ -32,7 +29,6 @@ export default function ImageGallerySection({
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [imageError, setImageError] = useState<{ [key: string]: boolean }>({});
 
-  // Ensure minimum 3 images
   const displayImages =
     images && images.length >= 3
       ? images

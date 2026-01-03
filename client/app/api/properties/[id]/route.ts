@@ -1,4 +1,3 @@
-// app/api/properties/[id]/route.ts - NEW FILE
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -37,7 +36,6 @@ export async function GET(
       );
     }
 
-    // Parse JSON images back to array (consistent with your existing code)
     const formattedProperty = {
       ...property,
       images:

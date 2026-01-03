@@ -1,15 +1,12 @@
-// app/api/properties/route.ts - UPDATED
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET - For listing properties (your existing code)
 export async function GET(request: NextRequest) {
   try {
     console.log("📡 API: Fetching properties...");
 
     const url = new URL(request.url);
 
-    // Get query parameters with defaults
     const category = url.searchParams.get("category");
     const type = url.searchParams.get("type");
     const cityId = url.searchParams.get("cityId");
@@ -31,7 +28,6 @@ export async function GET(request: NextRequest) {
       limit,
     });
 
-    // Build where clause
     const where: any = {};
 
     if (category) where.category = category;
@@ -47,7 +43,6 @@ export async function GET(request: NextRequest) {
 
     console.log("Where clause:", where);
 
-    // Get properties with pagination
     const [properties, total] = await Promise.all([
       prisma.property.findMany({
         where,
@@ -66,7 +61,6 @@ export async function GET(request: NextRequest) {
 
     console.log(`Found ${properties.length} properties, total: ${total}`);
 
-    // Parse JSON images back to array
     const formattedProperties = properties.map((property) => ({
       ...property,
       images:
@@ -103,14 +97,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - For creating new properties
 export async function POST(request: NextRequest) {
   try {
     console.log("📡 API: Creating new property...");
 
     const body = await request.json();
 
-    // Validate required fields
     const requiredFields = [
       "title",
       "category",
@@ -132,7 +124,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ensure images is an array and has at least 3 images
     const images = Array.isArray(body.images) ? body.images : [];
     if (images.length < 3) {
       return NextResponse.json(
@@ -144,7 +135,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create property
     const property = await prisma.property.create({
       data: {
         title: body.title,
@@ -159,7 +149,7 @@ export async function POST(request: NextRequest) {
         cityId: body.cityId,
         districtId: body.districtId,
         address: body.address || null,
-        images: images, // Store as JSON array
+        images: images,
         contactName: body.contactName || "Anonymous",
         contactPhone: body.contactPhone,
         contactEmail: body.contactEmail || null,
@@ -172,7 +162,6 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Property created: ${property.id}`);
 
-    // Parse JSON images back to array (consistent format)
     const formattedProperty = {
       ...property,
       images:

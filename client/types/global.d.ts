@@ -36,7 +36,8 @@ export interface Property {
   description?: string | null;
   category: PropertyCategory;
   type: PropertyType;
-  price: number | string; // Decimal can be string or number
+  price: number | string;
+  pricePerSqm: number | null;
   area: number | string;
   rooms?: number | null;
   floor?: number | null;
@@ -46,7 +47,7 @@ export interface Property {
   districtId: string;
   district: District;
   address?: string | null;
-  images: string[]; // Array of image URLs
+  images: string[];
   contactName: string;
   contactPhone: string;
   contactEmail?: string | null;

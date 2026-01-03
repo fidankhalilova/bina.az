@@ -1,4 +1,3 @@
-// src/app/properties/[id]/page.tsx
 "use client";
 import { useProperties } from "@/hooks/useProperties";
 import ImageGallerySection from "@/Sections/property-detail/ImageGallerySection";
@@ -7,7 +6,6 @@ import PropertyDescriptionSection from "@/Sections/property-detail/PropertyDescr
 import LocationSection from "@/Sections/property-detail/LocationSection";
 import ContactSection from "@/Sections/property-detail/ContactSection";
 import SimilarPropertiesSection from "@/Sections/property-detail/SimilarPropertiesSection";
-import { Heart, Share2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 export default function PropertyDetailPage({
@@ -16,7 +14,7 @@ export default function PropertyDetailPage({
   params: { id: string };
 }) {
   const {
-    data: apiResponse, // Changed from 'property' to 'apiResponse'
+    data: apiResponse,
     isLoading,
     error,
   } = useQuery({

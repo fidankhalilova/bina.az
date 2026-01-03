@@ -1,5 +1,3 @@
-// src/components/HouseCard/HouseCard.tsx
-
 "use client";
 
 import React from "react";

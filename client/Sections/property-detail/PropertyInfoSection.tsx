@@ -1,4 +1,3 @@
-// src/sections/property-detail/PropertyInfoSection.tsx
 "use client";
 
 import React from "react";
@@ -40,7 +39,7 @@ export default function PropertyInfoSection({
     },
     {
       label: "Qiymət",
-      value: `${new Intl.NumberFormat("az-AZ").format(property.price)} AZN`,
+      value: `${property.price} AZN`,
     },
     {
       label: "m² qiyməti",

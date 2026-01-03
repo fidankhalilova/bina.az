@@ -1,4 +1,3 @@
-// app/api/districts/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -8,17 +7,14 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
 
-    // Query parameters
     const cityId = url.searchParams.get("cityId");
     const limit = parseInt(url.searchParams.get("limit") || "100");
     const page = parseInt(url.searchParams.get("page") || "1");
     const skip = (page - 1) * limit;
 
-    // Build where clause
     const where: any = {};
     if (cityId) where.cityId = cityId;
 
-    // Get districts with city info and property counts
     const [districts, total] = await Promise.all([
       prisma.district.findMany({
         where,
@@ -73,14 +69,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST endpoint to create a new district
 export async function POST(request: NextRequest) {
   try {
     console.log("📡 API: Creating new district...");
 
     const body = await request.json();
 
-    // Validate required fields
     if (!body.name || !body.slug || !body.cityId) {
       return NextResponse.json(
         {
@@ -91,7 +85,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if city exists
     const city = await prisma.city.findUnique({
       where: { id: body.cityId },
     });
@@ -106,7 +99,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if district with same slug already exists in this city
     const existingDistrict = await prisma.district.findFirst({
       where: {
         cityId: body.cityId,
@@ -124,7 +116,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create district
     const district = await prisma.district.create({
       data: {
         name: body.name,

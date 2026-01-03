@@ -1,5 +1,3 @@
-// src/sections/property-create/StepFour.tsx
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -26,21 +24,16 @@ interface StepFourProps {
   isSubmitting: boolean;
 }
 
-// Helper function to extract data from API response
 const extractDataFromResponse = (response: any): any[] => {
-  // If response has success and data properties
   if (response?.success && Array.isArray(response.data)) {
     return response.data;
   }
-  // If response is already an array
   if (Array.isArray(response)) {
     return response;
   }
-  // If response.data exists but is not in success format
   if (Array.isArray(response?.data)) {
     return response.data;
   }
-  // Default fallback
   console.error("Could not extract data from response:", response);
   return [];
 };
@@ -86,7 +79,6 @@ export default function StepFour({
       });
   }, []);
 
-  // Fetch districts when city changes
   useEffect(() => {
     if (selectedCityId) {
       setIsLoadingDistricts(true);
@@ -132,7 +124,7 @@ export default function StepFour({
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const cityId = e.target.value;
     setSelectedCityId(cityId);
-    setFormData((prev) => ({ ...prev, cityId, districtId: "" })); // Reset district
+    setFormData((prev) => ({ ...prev, cityId, districtId: "" }));
   };
 
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

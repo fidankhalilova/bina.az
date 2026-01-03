@@ -1,4 +1,3 @@
-// src/Sections/home/PropertiesSection.tsx - UPDATED VERSION
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -17,14 +16,12 @@ export default function PropertiesSection({
   const [activeFilters, setActiveFilters] = useState<any>({});
   const [totalResults, setTotalResults] = useState(0);
 
-  // Initialize from props
   useEffect(() => {
     if (initialFilters) {
       setActiveFilters(initialFilters);
     }
   }, [initialFilters]);
 
-  // Listen to filter changes
   useEffect(() => {
     const handleFilterChange = (event: CustomEvent) => {
       setActiveFilters(event.detail);
@@ -43,14 +40,12 @@ export default function PropertiesSection({
     };
   }, []);
 
-  // Prepare filters for API call - convert all values to strings
   const apiFilters = {
     ...activeFilters,
     limit: "4",
     page: "1",
   };
 
-  // Convert all values to strings and remove empty values
   const cleanFilters: Record<string, string> = {};
   Object.entries(apiFilters).forEach(([key, value]) => {
     if (value !== "" && value !== undefined && value !== null) {
@@ -58,7 +53,6 @@ export default function PropertiesSection({
     }
   });
 
-  // For URL params (excluding limit and page for the "Hamısını gör" link)
   const urlFilters: Record<string, string> = {};
   Object.entries(activeFilters).forEach(([key, value]) => {
     if (
@@ -86,7 +80,6 @@ export default function PropertiesSection({
     }
   }, [data]);
 
-  // Check if we have active filters (excluding default category)
   const hasActiveFilters = Object.keys(activeFilters).some(
     (key) => key !== "category" && activeFilters[key] !== ""
   );

@@ -1,14 +1,11 @@
-// hooks/useLocations.ts
 import { useQuery } from "@tanstack/react-query";
 
-// Fetch all cities
 async function fetchCities() {
   const response = await fetch("/api/cities");
   if (!response.ok) throw new Error("Failed to fetch cities");
   return response.json();
 }
 
-// Fetch districts by city
 async function fetchDistrictsByCity(cityId: string) {
   if (!cityId) return { data: [] };
   const response = await fetch(`/api/districts?cityId=${cityId}`);
@@ -20,7 +17,7 @@ export function useCities() {
   return useQuery({
     queryKey: ["cities"],
     queryFn: fetchCities,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }
 

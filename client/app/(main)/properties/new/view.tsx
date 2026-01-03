@@ -1,5 +1,3 @@
-// src/app/properties/new/page.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -20,8 +18,8 @@ export type PropertyFormData = {
   ownerType?: "OWNER" | "AGENT";
 
   // Step 4 - Complete form
-  cityId?: string; // Changed to ID
-  districtId?: string; // Changed to ID
+  cityId?: string;
+  districtId?: string;
   address?: string;
   area?: string;
   rooms?: string;
@@ -60,8 +58,6 @@ export default function NewPropertyPage() {
     setCurrentStep((prev) => Math.max(1, prev - 1));
   };
 
-  // In src/app/properties/new/page.tsx - Update the handleFinalSubmit function:
-
   const handleFinalSubmit = async (finalData: PropertyFormData) => {
     setIsSubmitting(true);
 
@@ -70,12 +66,11 @@ export default function NewPropertyPage() {
 
       console.log("Submitting property data:", completeData);
 
-      // Map your form field names to match your Prisma schema
       const propertyData = {
-        title: `Əmlak ${Date.now()}`, // You need a title field - add this to your form or generate one
+        title: `Əmlak ${Date.now()}`,
         description: completeData.description || null,
-        category: completeData.listingType || "SALE", // Use listingType from step 1
-        type: completeData.propertyType || "NEW_BUILDING", // Use propertyType from step 2
+        category: completeData.listingType || "SALE",
+        type: completeData.propertyType || "NEW_BUILDING",
         price: completeData.price || "0",
         area: completeData.area || "0",
         rooms: completeData.rooms ? parseInt(completeData.rooms) : null,
@@ -86,7 +81,7 @@ export default function NewPropertyPage() {
         cityId: completeData.cityId || "",
         districtId: completeData.districtId || "",
         address: completeData.address || null,
-        images: completeData.imageUrls || [], // This will be converted to JSON in the API
+        images: completeData.imageUrls || [],
         contactName: completeData.contactName || "Anonymous",
         contactPhone: completeData.contactPhone || "",
         contactEmail: completeData.contactEmail || null,

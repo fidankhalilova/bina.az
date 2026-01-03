@@ -1,4 +1,3 @@
-// src/Sections/home/HeroSection.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,7 +7,7 @@ import { Search, SlidersHorizontal, MapPin, FilterX } from "lucide-react";
 export default function HeroSection() {
   const router = useRouter();
   const [filters, setFilters] = useState({
-    category: "", // Changed from "SALE" to empty for "All"
+    category: "",
     type: "",
     rooms: "",
     cityId: "",
@@ -20,12 +19,11 @@ export default function HeroSection() {
   const [districts, setDistricts] = useState<any[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  // Initialize filters from URL on component mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const urlFilters = {
-        category: params.get("category") || "", // Changed to empty default
+        category: params.get("category") || "",
         type: params.get("type") || "",
         rooms: params.get("rooms") || "",
         cityId: params.get("cityId") || "",
@@ -37,7 +35,6 @@ export default function HeroSection() {
     }
   }, []);
 
-  // Listen for filter changes from other components
   useEffect(() => {
     const handleFilterChange = (event: CustomEvent) => {
       setFilters(event.detail);
@@ -56,7 +53,6 @@ export default function HeroSection() {
     };
   }, []);
 
-  // Fetch cities
   useEffect(() => {
     fetch("/api/cities")
       .then((r) => r.json())
@@ -70,7 +66,6 @@ export default function HeroSection() {
       .catch((err) => console.error("Failed to load cities:", err));
   }, []);
 
-  // Fetch districts when city changes
   useEffect(() => {
     if (filters.cityId) {
       fetch(`/api/districts?cityId=${filters.cityId}`)
@@ -90,13 +85,11 @@ export default function HeroSection() {
 
   const handleFilterChange = (key: string, value: string) => {
     const newFilters = { ...filters, [key]: value };
-    // Reset district when city changes
     if (key === "cityId") {
       newFilters.districtId = "";
     }
     setFilters(newFilters);
 
-    // Dispatch event immediately for real-time updates
     window.dispatchEvent(
       new CustomEvent("filtersChanged", {
         detail: newFilters,
@@ -105,7 +98,6 @@ export default function HeroSection() {
   };
 
   const handleSearch = () => {
-    // Build query params
     const params = new URLSearchParams();
 
     Object.entries(filters).forEach(([key, value]) => {
@@ -114,10 +106,8 @@ export default function HeroSection() {
       }
     });
 
-    // Update URL without page reload
     router.push(`/?${params.toString()}`, { scroll: false });
 
-    // Dispatch custom event for the properties list to update
     window.dispatchEvent(
       new CustomEvent("filtersChanged", {
         detail: filters,
@@ -141,7 +131,6 @@ export default function HeroSection() {
     }
 
     setFilters(newFilters);
-    // Dispatch event immediately
     window.dispatchEvent(
       new CustomEvent("filtersChanged", {
         detail: newFilters,
@@ -163,7 +152,7 @@ export default function HeroSection() {
 
   const clearFilters = () => {
     const defaultFilters = {
-      category: "", // Changed to empty for "All"
+      category: "",
       type: "",
       rooms: "",
       cityId: "",
@@ -181,7 +170,6 @@ export default function HeroSection() {
     );
   };
 
-  // Check if we have active filters (now including category since it can be empty)
   const hasActiveFilters = Object.keys(filters).some(
     (key) => filters[key as keyof typeof filters] !== ""
   );

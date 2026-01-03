@@ -11,7 +11,6 @@ interface ContactSectionProps {
 }
 
 export default function ContactSection({ property }: ContactSectionProps) {
-  // Helper function to convert to number safely
   const toNumber = (value: string | number | null | undefined): number => {
     if (value === null || value === undefined) return 0;
     if (typeof value === "number") return value;
@@ -19,7 +18,6 @@ export default function ContactSection({ property }: ContactSectionProps) {
     return isNaN(num) ? 0 : num;
   };
 
-  // Calculate price per sqm safely
   const calculatePricePerSqm = (): number => {
     if (property.pricePerSqm !== undefined) {
       return toNumber(property.pricePerSqm);

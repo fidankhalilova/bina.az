@@ -15,7 +15,6 @@ export default function HomeTemplate() {
     maxPrice: "",
   });
 
-  // Listen for filter changes from HeroSection
   useEffect(() => {
     const handleFilterChange = (event: CustomEvent) => {
       setActiveFilters(event.detail);
@@ -34,7 +33,6 @@ export default function HomeTemplate() {
     };
   }, []);
 
-  // Also listen to URL changes on initial load
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -48,10 +46,8 @@ export default function HomeTemplate() {
         maxPrice: params.get("maxPrice") || "",
       };
 
-      // Only update if there are actual URL params
       if (window.location.search) {
         setActiveFilters(urlFilters);
-        // Dispatch to sync with HeroSection
         window.dispatchEvent(
           new CustomEvent("filtersChanged", {
             detail: urlFilters,

@@ -1,11 +1,8 @@
-// src/components/shared/Footer/Footer.tsx
-
 "use client";
 
 import React from "react";
 import Link from "next/link";
 
-// components/Footer.tsx
 export default function Footer() {
   const bakiRayonlari = [
     "Abşeron",
